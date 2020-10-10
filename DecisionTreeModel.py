@@ -4,6 +4,24 @@ import numpy as np
 import random as rd
 import math
 
+def levelOrder(tree):
+    print("BFS")
+    if tree:
+        queue = [tree]
+
+        while queue:
+            temp_print = []
+            temp_children = []
+            while queue:
+                curr = queue.pop(0)
+                temp_print.append(curr.val)
+                if curr.left:
+                    temp_children.append(curr.left)
+                if curr.right:
+                    temp_children.append(curr.right)
+            print(temp_print)
+            queue = temp_children[:]
+
 def informationContent(data):
     p0 = data.count(0)/len(data)
     p1 = data.count(1)/len(data)
@@ -58,8 +76,15 @@ def informationGain(data):
     return ig
 
 def splitData(data, igmax):
-    d0 = [i for i in data if i[0][igmax] == 0]
-    d1 = [i for i in data if i[0][igmax] == 1]
+    d0 = []
+    d1 = []
+    for i in data:
+        if i[0][igmax] == 0:
+            d0.append([i[0][ : igmax] + i[0][igmax + 1 :], i[1]])
+        else:
+            d1.append([i[0][ : igmax] + i[0][igmax + 1 :], i[1]])
+    # d0 = [i for i in data if i[0][igmax] == 0]
+    # d1 = [i for i in data if i[0][igmax] == 1]
     return [d0, d1]
 
 def decisionTree(data):
@@ -86,30 +111,25 @@ def decisionTree(data):
     if root.right == None:
         root.right = DecisionTree(val = float(datasplit[1][0][1]))
     return root
-    
-data = dg.dataGeneration(4, 30)
-print("Data : ")
-for d in data:
-    print(d)
-tree = decisionTree(data)
 
-print("BFS")
-if tree:
-    queue = [tree]
+def predict(tree, data):
+    cur = tree
+    while len(data) > 0:
+        if data[cur.val] == 0:
+            data = data[ : cur.val] + data[cur.val+1 : ]
+            cur = cur.left
+        else:
+            data = data[ : cur.val] + data[cur.val+1 : ]
+            cur = cur.right
+        if type(cur.val) == float:
+            return int(cur.val)
 
-    while queue:
-        temp_print = []
-        temp_children = []
-        while queue:
-            curr = queue.pop(0)
-            temp_print.append(curr.val)
-            if curr.left:
-                temp_children.append(curr.left)
-            if curr.right:
-                temp_children.append(curr.right)
-        print(temp_print)
-        queue = temp_children[:]
-
-else:
-    print(data[0][1])
-    
+if __name__ == "__main__":
+    data = dg.dataGeneration(4, 30)
+    print("Data : ")
+    for d in data:
+        print(d)
+    tree = decisionTree(data)
+    levelOrder(tree)
+    print("predicted value : ", predict(tree, data[0][0]))
+    print("original value : ", data[0][1])
